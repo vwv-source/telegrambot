@@ -9,22 +9,42 @@ const bot = new TelegramBot(token, {
    polling: true
 });
 
+var moderation = 'on'
+var moderationmsg = 'on'
+
+bot.on('message', (msg) => {
+    if (msg.text.includes("idiot") || msg.text.includes("fuck") || msg.text.includes("dumbass") || msg.text.includes("shit") || msg.text.includes("asshole")) {
+        if (moderation == 'on') {
+            bot.sendMessage(msg.chat.id,  'Hey, don\'t swear!\nSwearing is bad! 🤬');
+            bot.sendPhoto(msg.chat.id, 'https://www.vhv.rs/dpng/d/504-5048212_blobhandsome-discord-emoji-blob-emoji-for-discord-hd.png').then(() => {
+                if (moderationmsg == 'on') {
+                    bot.sendMessage(msg.chat.id, 'You can disable this feature by typing (/moderation off) or you can just disable this message by typing (/moderationmsg off)')
+                    return;
+                }
+                else if (moderationmsg == 'off') {
+                    return;
+                }
+            });
+        }
+        else {
+            return;
+        }
+    }
+    
+});
+
+
+bot.on('polling_error', error => console.log(error))
+
 bot.onText(/\/start/, (msg, match) => {
     const chatId = msg.chat.id;
-    bot.sendMessage(chatId, 'Hey there! Type /help to see my commands!', {
-        'reply_markup': {
-            'keyboard': [['/help'], ['/info', '/hug', '/wave']],
-            resize_keyboard: true,
-            one_time_keyboard: true,
-            force_reply: true,
-        }
-    });
+    bot.sendMessage(chatId, 'Hey there! Type /help to see my commands!');
 });
 
 bot.onText(/\/help/, (msg, match) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 
-        'General commands:\n/info - Used to see information about the bot\n\nAnime commands:\n/hug (person) - Used to hug someone\n/wave (person) - Used to wave to a person\n\nUtility commands:\n/calc (equation)'
+        'General commands:\n/info - Used to see information about the bot\n\nAnime commands:\n/hug (person) - Used to hug someone\n/wave (person) - Used to wave to a person\n\nUtility commands:\n/calc (equation)\n\nYoutube commands:\n/ytsearch (video) - Used to search for a video on youtube'
     )
 });
 
@@ -75,7 +95,7 @@ bot.onText(/\/hug/, (msg, match) => {
     var personhug = match.input.split(' ')
     personhug = personhug.toString().replace('/hug,', '')
     personhug = personhug.toString().replace(/[,]/g, ' ')
-    if (personhug === '/hug') {
+    if (personhug.includes('/hug')) {
         bot.sendMessage(chatId, 'Please use the correct command format\n/hug (person)')
         return;
     }
@@ -103,6 +123,7 @@ bot.onText(/\/hug/, (msg, match) => {
     ).then(() => {
         bot.sendMessage(chatId, 'Hugged '+personhug+"!")
     });
+    return;
 });
 
 bot.onText(/\/ytsearch/, (msg, match) => {
@@ -115,7 +136,7 @@ bot.onText(/\/ytsearch/, (msg, match) => {
         var args = match.input.split(' ')
         args = args.toString().replace('/ytsearch,', '')
         args = args.toString().replace(/[,]/g, ' ')
-        if (args === '/ytsearch') {
+        if (args.includes('/ytsearch')) {
             bot.sendMessage(chatId, 'Please use the correct command format\n/ytsearch (video)')
             return;
         }
@@ -129,9 +150,6 @@ bot.onText(/\/ytsearch/, (msg, match) => {
     return;
 });
 
-const wave = ['https://i.imgur.com/7F61XXR.gif', 'https://i.imgur.com/wjaKPmk.gif', 'https://i.imgur.com/UcGioIH.gif', 'https://i.imgur.com/AqK6ipr.gif', 'https://i.imgur.com/BdidgkM.gif', 'https://i.imgur.com/TMaBtNt.gif', 'https://i.imgur.com/pkWTMMl.gif']
-const wave1 = wave[Math.floor(Math.random()*wave.length)];
-
 bot.onText(/\/wave/, (msg, match) => {
     const chatId = msg.chat.id;
     const waveimages = ['https://i.imgur.com/7F61XXR.gif', 'https://i.imgur.com/wjaKPmk.gif', 'https://i.imgur.com/UcGioIH.gif', 'https://i.imgur.com/AqK6ipr.gif', 'https://i.imgur.com/BdidgkM.gif', 'https://i.imgur.com/TMaBtNt.gif', 'https://i.imgur.com/pkWTMMl.gif']
@@ -139,7 +157,7 @@ bot.onText(/\/wave/, (msg, match) => {
     var personwave = match.input.split(' ')
     personwave = personwave.toString().replace('/wave,', '')
     personwave = personwave.toString().replace(/[,]/g, ' ')
-    if (personwave === '/wave') {
+    if (personwave.includes('/wave')) {
         bot.sendMessage(chatId, 'Please use the correct command format\n/wave (person)')
         return;
     }
@@ -167,6 +185,7 @@ bot.onText(/\/wave/, (msg, match) => {
     ).then(() => {
         bot.sendMessage(chatId, 'Waved to '+personwave+"!")
     });
+    return;
 });
 
 bot.onText(/\/calc/, (msg, match) => {
@@ -174,9 +193,89 @@ bot.onText(/\/calc/, (msg, match) => {
     var mathArgs = match.input.split(' ')
     mathArgs = mathArgs.toString().replace('/calc,', '')
     mathArgs = mathArgs.toString().replace(/[,]/g, ' ')
-    if (mathArgs === '/calc') {
+    if (mathArgs.includes('/calc')) {
         bot.sendMessage(chatId, 'Please use the correct command format\n/calc (equation)')
         return;
     }
     bot.sendMessage(chatId, 'Equation: '+mathArgs+'\nAnswer: '+math.evaluate(mathArgs))
+});
+
+bot.onText(/\/moderation/, (msg, match) => {
+    const chatId = msg.chat.id;
+    var moderationtext = match.input.split(' ')
+    moderationtext = moderationtext.toString().replace('/moderation,', '')
+    moderationtext = moderationtext.toString().replace(/[,]/g, ' ')
+    if (moderationtext === '/moderation') {
+        if (moderation == 'on') {
+            bot.sendMessage(chatId, 'Please use the correct command format\n/moderation (on/off)\nModeration is currently ON.')
+            return;
+        }
+        else if (moderation == 'off') {
+            bot.sendMessage(chatId, 'Please use the correct command format\n/moderation (on/off)\nModeration is currently OFF.')
+            return;
+        }
+    }
+    else if (moderationtext == 'on') {
+        if (moderation == 'on') {
+            bot.sendMessage(chatId, 'Auto moderation is already ON.')
+            return;
+        }
+        else {
+            moderation = 'on'
+            bot.sendMessage(chatId, 'Auto moderation has been turned ON.')
+            return;
+        }
+    }
+    else if (moderationtext == 'off') {
+        if (moderation == 'off') {
+            bot.sendMessage(chatId, 'Auto moderation is already OFF.')
+            return;
+        }
+        else {
+            moderation = 'off'
+            bot.sendMessage(chatId, 'Auto moderation has been turned OFF.')
+            return;
+        }
+    }
+    return;
+});
+
+bot.onText(/\/moderationmsg/, (msg, match) => {
+    const chatId = msg.chat.id;
+    var moderationtext1 = match.input.split(' ')
+    moderationtext1 = moderationtext1.toString().replace('/moderationmsg,', '')
+    moderationtext1 = moderationtext1.toString().replace(/[,]/g, ' ')
+    if (moderationtext1 === '/moderationmsg') {
+        if (moderationmsg == 'on') {
+            bot.sendMessage(chatId, 'Please use the correct command format\n/moderationmsg (on/off)\nThe moderation message is currently ON.')
+            return;
+        }
+        else if (moderationmsg == 'off') {
+            bot.sendMessage(chatId, 'Please use the correct command format\n/moderationmsg (on/off)\nThe moderation message is currently OFF.')
+            return;
+        }
+    }
+    else if (moderationtext1 == 'on') {
+        if (moderationmsg == 'on') {
+            bot.sendMessage(chatId, 'The moderation message is already ON.')
+            return;
+        }
+        else {
+            moderationmsg = 'on'
+            bot.sendMessage(chatId, 'The moderation message has been turned ON.')
+            return;
+        }
+    }
+    else if (moderationtext1 == 'off') {
+        if (moderationmsg == 'off') {
+            bot.sendMessage(chatId, 'The moderation message is already OFF.')
+            return;
+        }
+        else {
+            moderationmsg = 'off'
+            bot.sendMessage(chatId, 'The moderation message has been turned OFF.')
+            return;
+        }
+    }
+    return;
 });
