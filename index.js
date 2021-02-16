@@ -2,8 +2,10 @@ require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const { YTSearcher } = require('ytsearcher');
 const math = require('mathjs');
+const axios = require('axios')
 
 const token = ('1652610357:AAEoQQjDlWWtGAEHhPC5IvlzW88tdrDw0LE')
+const pexelKey = '563492ad6f917000010000014f8d432be45d47e0a89f5dc88a3f65e7'
 
 const bot = new TelegramBot(token, {
    polling: true
@@ -277,5 +279,35 @@ bot.onText(/\/moderationmsg/, (msg, match) => {
             return;
         }
     }
+    return;
+});
+
+bot.onText(/\/imgsearch/, (msg, match) => {
+    async function imgsearch() {
+
+        var imgtext = match.input.split(' ')
+        imgtext = imgtext.toString().replace('/imgsearch,', '')
+
+        const fetchImages = async (imgtext) => {
+            try {
+              const { data: { photos } } = await axios.get(`https://api.pexels.com/v1/search?query=${encodeURI(imgtext)}&per_page=5`, {
+                headers: { Authorization: pexelKey }
+              }).catch((e) => console.log(e));
+          
+              if (photos.length > 0) {
+                return photos.map(({ src }) => ({ media: { url: src?.original }, caption: "Pexel", type: "photo" }));
+              }
+            } catch (e) {
+              throw e;
+            }
+        };
+
+        const chatId = msg.chat.id;
+        const photos = await fetchImages(imgtext)
+        console.log(photos)
+        bot.sendMessage(chatId, photos.length)
+        return;
+    }
+    imgsearch()
     return;
 });
