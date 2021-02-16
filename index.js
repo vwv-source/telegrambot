@@ -1,6 +1,7 @@
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const { YTSearcher } = require('ytsearcher');
+const math = require('mathjs');
 
 const token = ('1652610357:AAEoQQjDlWWtGAEHhPC5IvlzW88tdrDw0LE')
 
@@ -23,14 +24,14 @@ bot.onText(/\/start/, (msg, match) => {
 bot.onText(/\/help/, (msg, match) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 
-        'General commands:\n\n/info Used to see information about the bot\n'
+        'General commands:\n/info - Used to see information about the bot\n\nAnime commands:\n/hug (person) - Used to hug someone\n/wave (person) - Used to wave to a person\n\nUtility commands:\n/calc (equation)'
     )
 });
 
 bot.onText(/\/info/, (msg, match) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 
-        'Running on: Javascript\nHosted on: Heroku'
+        'Running on: Heroku\nCoded on: Javascript\nCreated on: 15-February-2021'
         )
 });
 
@@ -74,7 +75,11 @@ bot.onText(/\/hug/, (msg, match) => {
     var personhug = match.input.split(' ')
     personhug = personhug.toString().replace('/hug,', '')
     personhug = personhug.toString().replace(/[,]/g, ' ')
-    if (personhug === 'me') {
+    if (personhug === '/hug') {
+        bot.sendMessage(chatId, 'Please use the correct command format\n/hug (person)')
+        return;
+    }
+    else if (personhug === 'me') {
         bot.sendAnimation(
             chat_id = chatId,
             photo = hugimage,
@@ -110,6 +115,10 @@ bot.onText(/\/ytsearch/, (msg, match) => {
         var args = match.input.split(' ')
         args = args.toString().replace('/ytsearch,', '')
         args = args.toString().replace(/[,]/g, ' ')
+        if (args === '/ytsearch') {
+            bot.sendMessage(chatId, 'Please use the correct command format\n/ytsearch (video)')
+            return;
+        }
         let result = await searcher.search(args, { type: "video" })
 		const songInfo = await result.first.url
         bot.sendMessage(chatId, 'Searched for ( '+args+' ) on youtube.').then(() => {
@@ -130,7 +139,11 @@ bot.onText(/\/wave/, (msg, match) => {
     var personwave = match.input.split(' ')
     personwave = personwave.toString().replace('/wave,', '')
     personwave = personwave.toString().replace(/[,]/g, ' ')
-    if (personwave === 'me') {
+    if (personwave === '/wave') {
+        bot.sendMessage(chatId, 'Please use the correct command format\n/wave (person)')
+        return;
+    }
+    else if (personwave === 'me') {
         bot.sendAnimation(
             chat_id = chatId,
             photo = waveimage,
@@ -154,4 +167,16 @@ bot.onText(/\/wave/, (msg, match) => {
     ).then(() => {
         bot.sendMessage(chatId, 'Waved to '+personwave+"!")
     });
+});
+
+bot.onText(/\/calc/, (msg, match) => {
+    const chatId = msg.chat.id;
+    var mathArgs = match.input.split(' ')
+    mathArgs = mathArgs.toString().replace('/calc,', '')
+    mathArgs = mathArgs.toString().replace(/[,]/g, ' ')
+    if (mathArgs === '/calc') {
+        bot.sendMessage(chatId, 'Please use the correct command format\n/calc (equation)')
+        return;
+    }
+    bot.sendMessage(chatId, 'Equation: '+mathArgs+'\nAnswer: '+math.evaluate(mathArgs))
 });
