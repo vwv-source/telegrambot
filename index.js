@@ -288,14 +288,14 @@ bot.onText(/\/imgsearch/, (msg, match) => {
         var imgtext = match.input.split(' ')
         imgtext = imgtext.toString().replace('/imgsearch,', '')
 
-        const fetchImages = async (imgtext) => {
+        var fetchImages = async (imgtext) => {
             try {
-              const { data: { photos } } = await axios.get(`https://api.pexels.com/v1/search?query=${encodeURI(imgtext)}&per_page=5`, {
+              var { data: { photos } } = await axios.get(`https://api.pexels.com/v1/search?query=${encodeURI(imgtext)}&per_page=5`, {
                 headers: { Authorization: pexelKey }
               }).catch((e) => console.log(e));
           
               if (photos.length > 0) {
-                return photos.map(({ src }) => ({ media: { url: src?.original }, caption: "Pexel", type: "photo" }));
+                return photos.map(({ src }) => ({ media: { url: src?.original }}));
               }
             } catch (e) {
               throw e;
@@ -303,7 +303,11 @@ bot.onText(/\/imgsearch/, (msg, match) => {
         };
 
         const chatId = msg.chat.id;
-        const photos = await fetchImages(imgtext)
+        var photos = await fetchImages(imgtext)
+        if (!photos) {
+            bot.sendMessage(chatId, 'The images you were looking for could not be found')
+            return;
+        }
         console.log(photos)
         bot.sendMessage(chatId, photos.length)
         return;
